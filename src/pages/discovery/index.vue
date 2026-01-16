@@ -3,6 +3,12 @@
     <h2>运动社区</h2>
     
     <div class="content">
+      <!-- 热门课程 -->
+      <PopularSection />
+      
+      <!-- 推荐课程 -->
+      <RecommendedSection />
+      
       <el-card class="section-card">
         <template #header>
           <div class="card-header">
@@ -70,6 +76,8 @@ import { getCourseListApi, getCourseDetailApi } from '@/api/course'
 import { useUserStore } from '@/stores/user'
 import type { CourseVO, CourseDetailVO } from '@/api/model/courseModel'
 import type { Result } from '@/utils/request'
+import PopularSection from '@/components/discovery/PopularSection.vue'
+import RecommendedSection from '@/components/discovery/RecommendedSection.vue'
 
 const router = useRouter()
 const userStore = useUserStore()

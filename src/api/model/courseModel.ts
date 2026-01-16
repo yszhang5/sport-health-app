@@ -39,6 +39,8 @@ export interface CourseVO {
     isFavorite?: boolean;   // 是否收藏
     venueId?: number;       // 所属场馆ID（仅线下课程）
     venueName?: string;     // 场馆名称
+    description?: string;   // 课程描述
+    status?: number;        // 状态：0:下架, 1:上架
 }
 
 /**

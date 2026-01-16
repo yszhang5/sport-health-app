@@ -44,8 +44,33 @@
             >
               立即学习
             </el-button>
+            <el-button 
+              v-if="course.venueId"
+              type="success" 
+              size="large" 
+              @click="handleBooking"
+              style="width: 100%; margin-top: 12px;"
+            >
+              预约课程
+            </el-button>
           </div>
         </div>
+      </el-card>
+
+      <!-- 评价区域 -->
+      <el-card class="review-section" style="margin-top: 20px;" v-if="course">
+        <CourseReviewForm 
+          v-if="!myReview"
+          :course-id="course.courseId"
+          @submitted="loadReviews"
+        />
+        <ReviewList 
+          :reviews="reviews"
+          :total="reviewTotal"
+          :page-size="10"
+          @page-change="handleReviewPageChange"
+          @delete="handleDeleteReview"
+        />
       </el-card>
 
       <el-empty v-else-if="!loading" description="课程不存在" />
@@ -61,7 +86,11 @@ import { User, Star, Clock, Lightning } from '@element-plus/icons-vue'
 import { getCourseDetailApi } from '@/api/course'
 import { addCourseToUserApi } from '@/api/user'
 import { useUserStore } from '@/stores/user'
+import { getCourseReviewsApi, getMyCourseReviewApi, deleteCourseReviewApi } from '@/api/review'
 import type { CourseDetailVO } from '@/api/model/courseModel'
+import type { CourseReviewVO } from '@/api/model/courseModel'
+import CourseReviewForm from '@/components/review/CourseReviewForm.vue'
+import ReviewList from '@/components/review/ReviewList.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -70,6 +99,10 @@ const userStore = useUserStore()
 const loading = ref(true)
 const course = ref<CourseDetailVO | null>(null)
 const enrolling = ref(false)
+const reviews = ref<CourseReviewVO[]>([])
+const myReview = ref<CourseReviewVO | null>(null)
+const reviewTotal = ref(0)
+const reviewPage = ref(1)
 
 const formatNumber = (num: number | undefined | null) => {
   if (num === undefined || num === null || isNaN(num)) {
@@ -120,8 +153,64 @@ const handleEnroll = async () => {
   }
 }
 
-onMounted(() => {
-  loadCourseDetail()
+const handleBooking = () => {
+  if (!course.value || !course.value.venueId) return
+  router.push({
+    path: '/bookings/create',
+    query: {
+      venueId: course.value.venueId.toString(),
+      courseId: course.value.courseId.toString()
+    }
+  })
+}
+
+const loadReviews = async (page: number = 1) => {
+  if (!course.value) return
+  
+  try {
+    const res = await getCourseReviewsApi(course.value.courseId, { page, size: 10 })
+    if (res.code === 200) {
+      reviews.value = res.data || []
+    }
+  } catch (error: any) {
+    console.error('Load reviews failed:', error)
+  }
+  
+  // 加载我的评价
+  try {
+    const myRes = await getMyCourseReviewApi(course.value.courseId)
+    if (myRes.code === 200 && myRes.data) {
+      myReview.value = myRes.data
+    } else {
+      myReview.value = null
+    }
+  } catch (error) {
+    myReview.value = null
+  }
+}
+
+const handleReviewPageChange = (page: number) => {
+  reviewPage.value = page
+  loadReviews(page)
+}
+
+const handleDeleteReview = async (reviewId: number) => {
+  if (!course.value) return
+  
+  try {
+    await deleteCourseReviewApi(course.value.courseId, reviewId)
+    ElMessage.success('删除成功')
+    loadReviews(reviewPage.value)
+  } catch (error: any) {
+    ElMessage.error(error.message || '删除失败')
+  }
+}
+
+onMounted(async () => {
+  await loadCourseDetail()
+  if (course.value) {
+    await loadReviews()
+  }
 })
 </script>
 

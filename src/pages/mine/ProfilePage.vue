@@ -8,6 +8,7 @@
           <div class="user-info">
             <h3>{{ userStore.userInfo.nickname }}</h3>
             <p class="mobile">{{ userStore.userInfo.mobile }}</p>
+            <p class="points">当前可用积分：{{ currentPoints }}</p>
           </div>
           <el-button type="primary" @click="goToEdit">修改个人信息</el-button>
         </div>
@@ -45,6 +46,10 @@
 
       <el-card class="menu-card">
         <el-menu>
+          <el-menu-item @click="goToBookings">
+            <el-icon><Calendar /></el-icon>
+            <span>我的预约</span>
+          </el-menu-item>
           <el-menu-item @click="goToHistory">
             <el-icon><Clock /></el-icon>
             <span>运动历史</span>
@@ -52,6 +57,22 @@
           <el-menu-item @click="goToRank">
             <el-icon><Trophy /></el-icon>
             <span>排行榜</span>
+          </el-menu-item>
+          <el-menu-item @click="goToAchievements">
+            <el-icon><Star /></el-icon>
+            <span>运动成就</span>
+          </el-menu-item>
+          <el-menu-item @click="goToPointRecords">
+            <el-icon><Wallet /></el-icon>
+            <span>积分记录</span>
+          </el-menu-item>
+          <el-menu-item @click="goToGiftShop">
+            <el-icon><Present /></el-icon>
+            <span>礼品商城</span>
+          </el-menu-item>
+          <el-menu-item @click="goToActivities">
+            <el-icon><Promotion /></el-icon>
+            <span>活动中心</span>
           </el-menu-item>
         </el-menu>
       </el-card>
@@ -69,14 +90,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Trophy, Clock } from '@element-plus/icons-vue'
+import { Trophy, Clock, Calendar, Star, Wallet, Present, Promotion } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { getMyAchievementsApi } from '@/api/achievement'
 
 const router = useRouter()
 const userStore = useUserStore()
+const currentPoints = ref(0)
 
 const goToHistory = () => {
   router.push('/sport/history')
@@ -88,6 +111,37 @@ const goToRank = () => {
 
 const goToEdit = () => {
   router.push('/profile/edit')
+}
+
+const goToBookings = () => {
+  router.push('/bookings')
+}
+
+const goToAchievements = () => {
+  router.push('/achievements')
+}
+
+const goToPointRecords = () => {
+  router.push('/points/records')
+}
+
+const goToGiftShop = () => {
+  router.push('/gifts')
+}
+
+const goToActivities = () => {
+  router.push('/activities')
+}
+
+const loadCurrentPoints = async () => {
+  try {
+    const res = await getMyAchievementsApi()
+    if (res.code === 200 && res.data) {
+      currentPoints.value = res.data.currentPoints
+    }
+  } catch (error) {
+    // 忽略错误
+  }
 }
 
 const getGenderText = (gender: number | undefined | null): string => {
@@ -134,10 +188,11 @@ const handleLogout = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!userStore.userInfo) {
-    userStore.getProfile()
+    await userStore.getProfile()
   }
+  await loadCurrentPoints()
 })
 </script>
 
@@ -173,6 +228,13 @@ onMounted(() => {
             margin: 0;
             font-size: 14px;
             color: #999;
+          }
+
+          .points {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            color: #F56C6C;
+            font-weight: 600;
           }
         }
       }

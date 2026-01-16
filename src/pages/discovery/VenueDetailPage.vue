@@ -42,6 +42,29 @@
           </div>
         </el-card>
 
+        <!-- 操作按钮 -->
+        <div class="action-section" style="margin-bottom: 20px;">
+          <el-button 
+            type="primary" 
+            size="large" 
+            @click="handleBooking"
+            style="width: 200px;"
+          >
+            预约场馆
+          </el-button>
+        </div>
+
+        <!-- 评价区域 -->
+        <el-card class="review-section" style="margin-bottom: 20px;">
+          <ReviewList 
+            :reviews="venueReviews"
+            :total="reviewTotal"
+            :page-size="10"
+            @page-change="handleReviewPageChange"
+            @delete="handleDeleteReview"
+          />
+        </el-card>
+
         <!-- 课程列表 -->
         <div class="courses-section">
           <h2>场馆课程</h2>
@@ -94,11 +117,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { Location, Star, User, Lightning, Phone } from '@element-plus/icons-vue'
 import { getVenueDetailApi } from '@/api/venue'
 import { getCourseListApi } from '@/api/course'
+import { getVenueReviewsApi, deleteVenueReviewApi } from '@/api/review'
 import type { VenueVO } from '@/api/model/venueModel'
 import type { CourseVO } from '@/api/model/courseModel'
+import type { VenueReviewVO } from '@/api/model/venueModel'
+import ReviewList from '@/components/review/ReviewList.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -107,6 +134,9 @@ const loading = ref(true)
 const coursesLoading = ref(false)
 const venue = ref<VenueVO | null>(null)
 const allCourses = ref<CourseVO[]>([])
+const venueReviews = ref<VenueReviewVO[]>([])
+const reviewTotal = ref(0)
+const reviewPage = ref(1)
 
 const defaultCover = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400'
 
@@ -173,8 +203,51 @@ const toCourseDetail = (courseId: number) => {
   router.push(`/courses/${courseId}`)
 }
 
+const handleBooking = () => {
+  if (!venue.value) return
+  router.push({
+    path: '/bookings/create',
+    query: {
+      venueId: venue.value.venueId.toString()
+    }
+  })
+}
+
+const loadReviews = async (page: number = 1) => {
+  if (!venue.value) return
+  
+  try {
+    const res = await getVenueReviewsApi(venue.value.venueId, { page, size: 10 })
+    if (res.code === 200) {
+      venueReviews.value = res.data || []
+    }
+  } catch (error: any) {
+    console.error('Load reviews failed:', error)
+  }
+}
+
+const handleReviewPageChange = (page: number) => {
+  reviewPage.value = page
+  loadReviews(page)
+}
+
+const handleDeleteReview = async (reviewId: number) => {
+  if (!venue.value) return
+  
+  try {
+    await deleteVenueReviewApi(venue.value.venueId, reviewId)
+    ElMessage.success('删除成功')
+    loadReviews(reviewPage.value)
+  } catch (error: any) {
+    ElMessage.error(error.message || '删除失败')
+  }
+}
+
 onMounted(async () => {
   await Promise.all([loadVenueDetail(), loadAllCourses()])
+  if (venue.value) {
+    await loadReviews()
+  }
 })
 </script>
 

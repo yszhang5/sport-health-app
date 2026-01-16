@@ -27,6 +27,7 @@ export interface VenueVO {
     facilities?: string[];   // 设施列表
     images?: string[];       // 场馆图片
     description?: string;    // 场馆描述
+    coverImage?: string;     // 封面图片
     isFavorite?: boolean;    // 是否收藏
 }
 

@@ -69,4 +69,7 @@ service.interceptors.response.use(
     }
 );
 
+// Named export for app-wide usage (many modules expect `request.get(...)`)
+export const request = service;
+
 export default service;

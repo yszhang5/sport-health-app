@@ -15,3 +15,23 @@ export const getCourseDetailApi = (courseId: number) => {
     return service.get<any, Result<CourseDetailVO>>(`${Api.Detail}/${courseId}`);
 };
 
+/**
+ * 获取热门课程
+ */
+export const getPopularCoursesApi = (limit: number = 10) => {
+    return service.get<any, Result<CourseVO[]>>('/courses/popular', { params: { limit } });
+};
+
+/**
+ * 获取推荐课程
+ */
+export const getRecommendedCoursesApi = (limit: number = 10) => {
+    return service.get<any, Result<CourseVO[]>>('/courses/recommended', { params: { limit } });
+};
+
+/**
+ * 获取我管理的课程（管理员）
+ */
+export const getMyManagedCoursesApi = () => {
+    return service.get<any, Result<CourseVO[]>>('/courses/my/managed');
+};

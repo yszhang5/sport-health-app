@@ -80,6 +80,60 @@ const routes: RouteRecordRaw[] = [
         name: 'Community',
         component: () => import('../pages/discovery/index.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/bookings',
+        name: 'MyBookings',
+        component: () => import('../pages/booking/MyBookingsPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/bookings/create',
+        name: 'BookingCreate',
+        component: () => import('../pages/booking/BookingCreatePage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/achievements',
+        name: 'Achievements',
+        component: () => import('../pages/mine/AchievementPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/points/records',
+        name: 'PointRecords',
+        component: () => import('../pages/point/PointRecordPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/gifts',
+        name: 'GiftShop',
+        component: () => import('../pages/gift/GiftShopPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/gifts/:giftId',
+        name: 'GiftDetail',
+        component: () => import('../pages/gift/GiftDetailPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/gifts/exchanges',
+        name: 'MyExchanges',
+        component: () => import('../pages/gift/MyExchangesPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/activities',
+        name: 'ActivityList',
+        component: () => import('../pages/activity/ActivityListPage.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/activities/:activityId',
+        name: 'ActivityDetail',
+        component: () => import('../pages/activity/ActivityDetailPage.vue'),
+        meta: { requiresAuth: true }
     }
 ]
 
